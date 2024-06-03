@@ -21,11 +21,6 @@ This repository contains a modification for OpenCart 2.0 that enables the manage
 2. Go to the product form where you'll find a new "Catalogs" tab.
 3. Manage your catalogs by adding or editing catalog details such as file, name, sort order, and date added.
 
-## Screenshots
-
-![Catalogs Tab](screenshots/catalogs-tab.png)
-*Example of the new Catalogs tab in the product form.*
-
 ## Languages Supported
 
 - English

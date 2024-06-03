@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<name>Product catalogs</name>
+	<code>opencart-products-catalog</code>
+	<version>1.0.0</version>
+	<link>an.postoliuk@gmail.com</link>
+	<author>Andrii Postoliuk</author>
+	<file path="admin/language/english/default.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_address']                   = 'Address';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']                   = 'Catalogs';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['button_image_add']              = 'Add Image';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['button_catalog_add']            = 'Add catalog';]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/language/russian/default.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_address']                   = 'Адрес';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']         			 = 'Каталоги';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['button_image_add']              = 'Добавить';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['button_catalog_add']            = 'Добавить каталог';]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/language/ukrainian/default.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_address']                   = 'Адреса';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']            		 = 'Каталоги';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['button_image_add']              = 'Додати зображення';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['button_catalog_add']            = 'Додати каталог';]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/language/english/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['entry_name']             = 'Product Name';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['entry_catalog_name']         = 'Name';
+					$_['entry_catalog_file']         = 'File';
+					$_['entry_sort_order']         	 = 'Sort order';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/language/russian/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['entry_name']             = 'Название товара';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['entry_catalog_name']         = 'Имя';
+					$_['entry_catalog_file']         = 'Файл';
+					$_['entry_sort_order']         	 = 'Порядок сортировки';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/language/ukrainian/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['entry_name']             = 'Назва продукту';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['entry_catalog_name']         = 'Назва';
+					$_['entry_catalog_file']         = 'Файл';
+					$_['entry_sort_order']         	 = 'Порядок сортування';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/controller/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[$data['entry_name'] = $this->language->get('entry_name');]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$data['tab_catalog'] = $this->language->get('tab_catalog');
+					$data['entry_catalog_name'] = $this->language->get('entry_catalog_name');
+					$data['entry_catalog_file'] = $this->language->get('entry_catalog_file');
+					$data['entry_sort_order'] = $this->language->get('entry_sort_order');
+					$data['button_catalog_add'] = $this->language->get('button_catalog_add');
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$this->response->setOutput($this->load->view('catalog/product_form.tpl', $data));]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+				// Catalogs
+				if (isset($this->request->post['product_catalog'])) {
+					$product_catalogs = $this->request->post['product_catalog'];
+				} elseif (isset($this->request->get['product_id'])) {
+					$product_catalogs = $this->model_catalog_product->getProductCatalogs($this->request->get['product_id']);
+				} else {
+					$product_catalogs = array();
+				}
+
+				$data['product_catalogs'] = array();
+
+				foreach ($product_catalogs as $product_catalog) {
+					if (is_file(DIR_IMAGE . $product_catalog['file'])) {
+						$file = $product_catalog['file'];
+						$thumb = 'pdf_icon.png';
+					} else {
+						$file = '';
+						$thumb = 'no_image.png';
+					}
+
+					$data['product_catalogs'][] = array(
+						'product_catalog_description' 	=> $product_catalog['product_catalog_description'],
+						'file'      					=> $file,
+						'thumb'      					=> $this->model_tool_image->resize($thumb, 100, 100),
+						'sort_order' 					=> $product_catalog['sort_order'],
+						'date_added' 					=> $product_catalog['date_added']
+					);
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/model/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[$product_id = $this->db->getLastId();]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					if (isset($data['product_catalog'])) {
+						foreach ($data['product_catalog'] as $product_catalog) {
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_catalog SET product_id = '" . (int)$product_id . "', file = '" . $this->db->escape($product_catalog['file']) . "', sort_order = '" . (int)$product_catalog['sort_order'] . "', date_added = NOW()");
+
+							$product_catalog_id = $this->db->getLastId();
+
+							foreach ($product_catalog['product_catalog_description'] as $language_id => $product_catalog_description) {
+								$this->db->query("INSERT INTO " . DB_PREFIX . "product_catalog_description SET product_catalog_id = '" . (int)$product_catalog_id . "', language_id = '" . (int)$language_id . "', product_id = '" . (int)$product_id . "', name = '" .  $this->db->escape($product_catalog_description['name']) . "'");
+							}
+						}
+					}
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$this->event->trigger('pre.admin.product.edit', $data);]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_catalog WHERE product_id = '" . (int)$product_id . "'");
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_catalog_description WHERE product_id = '" . (int)$product_id . "'");
+
+					if (isset($data['product_catalog'])) {
+						foreach ($data['product_catalog'] as $product_catalog) {
+                            if (empty($product_catalog['date_added'])) {
+                                $date_string = 'NOW()';
+                            } else {
+                                $date_string = "'" . $product_catalog['date_added'] . "'";
+                            }
+							$this->db->query("INSERT INTO " . DB_PREFIX . "product_catalog SET product_id = '" . (int)$product_id . "', file = '" . $this->db->escape($product_catalog['file']) . "', sort_order = '" . (int)$product_catalog['sort_order'] . "', date_added = " . $date_string);
+
+							$product_catalog_id = $this->db->getLastId();
+
+							foreach ($product_catalog['product_catalog_description'] as $language_id => $product_catalog_description) {
+								$this->db->query("INSERT INTO " . DB_PREFIX . "product_catalog_description SET product_catalog_id = '" . (int)$product_catalog_id . "', language_id = '" . (int)$language_id . "', product_id = '" . (int)$product_id . "', name = '" .  $this->db->escape($product_catalog_description['name']) . "'");
+							}
+						}
+					}
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$this->addProduct($data);]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+					$data = array_merge($data, array('product_catalog' => $this->getProductCatalogs($product_id)));
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$this->event->trigger('pre.admin.product.delete', $product_id);]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_catalog WHERE product_id = '" . (int)$product_id . "'");
+					$this->db->query("DELETE FROM " . DB_PREFIX . "product_catalog_description WHERE product_id = '" . (int)$product_id . "'");
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[class ModelCatalogProduct extends Model {]]>
+			</search>
+			<add position="after">
+			<![CDATA[
+				public function getProductCatalogs($product_id) {
+					$product_catalog_data = array();
+
+					$product_catalog_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_catalog WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
+
+					foreach ($product_catalog_query->rows as $product_catalog) {
+						$product_catalog_description_data = array();
+
+						$product_catalog_description_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_catalog_description WHERE product_catalog_id = '" . (int)$product_catalog['product_catalog_id'] . "' AND product_id = '" . (int)$product_id . "'");
+
+						foreach ($product_catalog_description_query->rows as $product_catalog_description) {
+							$product_catalog_description_data[$product_catalog_description['language_id']] = array('name' => $product_catalog_description['name']);
+						}
+
+						$product_catalog_data[] = array(
+							'product_catalog_description' 	=> $product_catalog_description_data,
+							'file'                    		=> $product_catalog['file'],
+							'sort_order'               		=> $product_catalog['sort_order'],
+							'date_added'               		=> $product_catalog['date_added']
+						);
+					}
+
+					return $product_catalog_data;
+				}
+			]]>
+			</add>
+		</operation>
+	</file>
+	<file path="admin/view/template/catalog/product_form.tpl">
+		<operation>
+			<search>
+				<![CDATA[<li><a href="#tab-image" data-toggle="tab"><?php echo $tab_image; ?></a></li>]]>
+			</search>
+			<add position="after">
+				<![CDATA[<li><a href="#tab-catalog" data-toggle="tab"><?php echo $tab_catalog; ?></a></li>]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[<div class="tab-pane" id="tab-reward">]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+				<div class="tab-pane" id="tab-catalog">
+				  <div class="table-responsive">
+					<table id="catalog" class="table table-striped table-bordered table-hover">
+					  <thead>
+						<tr>
+						  <td class="text-left"><?php echo $entry_catalog_file; ?></td>
+						  <td class="text-right"><?php echo $entry_catalog_name; ?></td>
+						  <td class="text-right"><?php echo $entry_sort_order; ?></td>
+						  <td></td>
+						</tr>
+					  </thead>
+					  <tbody>
+						<?php $catalog_row = 0; ?>
+						<?php foreach ($product_catalogs as $product_catalog) { ?>
+							<tr id="catalog-row<?php echo $catalog_row; ?>">
+								<td class="text-left">
+									<a href="" id="file-thumb<?php echo $catalog_row; ?>" data-toggle="catalog-file-thumb" class="img-thumbnail">
+										<img src="<?php echo $product_catalog['thumb']; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" />
+									</a>
+									<input type="text" readonly name="product_catalog[<?php echo $catalog_row; ?>][file]" value="<?php echo $product_catalog['file']; ?>" id="input-product-catalog<?php echo $catalog_row; ?>" class="form-control"/>
+									<input type="hidden" name="product_catalog[<?php echo $catalog_row; ?>][date_added]" value="<?php echo $product_catalog['date_added']; ?>" class="form-control"/>
+								</td>
+								<td class="text-left"><?php foreach ($languages as $language) { ?>
+									<div class="input-group pull-left"><span class="input-group-addon"><img src="view/image/flags/<?php echo $language['image']; ?>" title="<?php echo $language['name']; ?>" /> </span>
+										 <input type="text" name="product_catalog[<?php echo $catalog_row; ?>][product_catalog_description][<?php echo $language['language_id']; ?>][name]" value="<?php echo isset($product_catalog['product_catalog_description'][$language['language_id']]) ? $product_catalog['product_catalog_description'][$language['language_id']]['name'] : ''; ?>" placeholder="<?php echo $entry_catalog_name; ?>" class="form-control" />
+									</div>
+									<?php if (isset($error_product_catalog[$catalog_row][$language['language_id']])) { ?>
+										<div class="text-danger"><?php echo $error_product_catalog[$catalog_row][$language['language_id']]; ?></div>
+									<?php } ?>
+								<?php } ?>
+								</td>
+								<td class="text-right">
+									<input type="text" name="product_catalog[<?php echo $catalog_row; ?>][sort_order]" value="<?php echo $product_catalog['sort_order']; ?>" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" />
+								</td>
+								<td class="text-left">
+									<button type="button" onclick="$('#catalog-row<?php echo $catalog_row; ?>, .tooltip').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger">
+										<i class="fa fa-minus-circle"></i>
+									</button>
+								</td>
+							</tr>
+						<?php $catalog_row++; ?>
+						<?php } ?>
+					  </tbody>
+					  <tfoot>
+						<tr>
+						  <td colspan="3"></td>
+						  <td class="text-left">
+							<button type="button" onclick="addCatalog();" data-toggle="tooltip" title="<?php echo $button_catalog_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button>
+						  </td>
+						</tr>
+					  </tfoot>
+					</table>
+				  </div>
+				</div>
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[function addImage() {]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+					var catalog_row = <?php echo $catalog_row; ?>;
+
+					function addCatalog() {
+						html  = '<tr id="catalog-row' + catalog_row + '">';
+						html += '  <td class="text-left"><a href="" id="file-thumb' + catalog_row + '" data-toggle="catalog-file-thumb" class="img-thumbnail"><img src="<?php echo $placeholder; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="text" readonly name="product_catalog[' + catalog_row + '][file]" value="" id="input-product-catalog' + catalog_row + '" class="form-control" /></td>';
+						html += '  <td class="text-left">';
+							<?php foreach ($languages as $language) { ?>
+							html += '    <div class="input-group">';
+								html += '      <span class="input-group-addon"><img src="view/image/flags/<?php echo $language['image']; ?>" title="<?php echo $language['name']; ?>" /></span><input type="text" name="product_catalog[' + catalog_row + '][product_catalog_description][<?php echo $language['language_id']; ?>][name]" value="" placeholder="<?php echo $entry_catalog_name; ?>" class="form-control" />';
+								html += '    </div>';
+							<?php } ?>
+						html += '  </td>';
+						html += '  <td class="text-right"><input type="text" name="product_catalog[' + catalog_row + '][sort_order]" value="" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>';
+						html += '  <td class="text-left"><button type="button" onclick="$(\'#catalog-row' + catalog_row  + '\').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+						html += '</tr>';
+
+						$('#catalog tbody').append(html);
+
+						catalog_row++;
+					}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/language/english/product/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_description']                         = 'Description';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']                         	   = 'Catalogs';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['text_search']                             = 'Search';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['text_catalog_name']                       		= 'Name';
+					$_['text_catalog_size']                       		= 'Size';
+					$_['text_catalog_date_added']                 		= 'Date ';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/language/russian/product/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_description']                         = 'Описание';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']                         	   = 'Каталоги';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['text_search']                             = 'Поиск';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['text_catalog_name']                       	   = 'Название';
+					$_['text_catalog_size']                       	   = 'Размер';
+					$_['text_catalog_date_added']                 	   = 'Дата ';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/language/ukrainian/product/product.php">
+		<operation>
+			<search>
+				<![CDATA[$_['tab_description']                         = 'Опис';]]>
+			</search>
+			<add position="after">
+				<![CDATA[$_['tab_catalog']                         	   = 'Каталоги';]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$_['text_search']                             = 'Пошук';]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$_['text_catalog_name']                       = 'Назва';
+					$_['text_catalog_size']                       = 'Розмір';
+					$_['text_catalog_date_added']                 = 'Дата ';
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/model/catalog/product.php">
+		<operation>
+			<search>
+				<![CDATA[class ModelCatalogProduct extends Model {]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					public function getProductCatalogs($product_id) {
+                        $query = $this->db->query("SELECT DISTINCT c.product_catalog_id, cd.name, c.file, c.date_added FROM `" . DB_PREFIX . "product_catalog` c LEFT JOIN " . DB_PREFIX . "product_catalog_description cd ON (c.product_catalog_id  = cd.product_catalog_id ) WHERE c.product_id = '" . (int)$product_id . "' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY c.date_added DESC");
+
+						return $query->rows;
+					}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/product.php">
+		<operation>
+			<search>
+				<![CDATA[$data['tab_description'] = $this->language->get('tab_description');]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$data['tab_catalog'] = $this->language->get('tab_catalog');
+					$data['text_catalog_name'] = $this->language->get('text_catalog_name');
+					$data['text_catalog_size'] = $this->language->get('text_catalog_size');
+					$data['text_catalog_date_added'] = $this->language->get('text_catalog_date_added');
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[$data['button_cart'] = $this->language->get('button_cart');]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					$data['button_download'] = $this->language->get('button_download');
+					$data['button_view'] = $this->language->get('button_view');
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[if ($this->model_catalog_product->getProductSizeStatus($product_id)) {]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+					$data['product_catalogs'] = array();
+
+					$product_catalogs = $this->model_catalog_product->getProductCatalogs($this->request->get['product_id']);
+
+					if (!empty($product_catalogs)) {
+						foreach ($product_catalogs as $product_catalog) {
+							if (file_exists(DIR_IMAGE . $product_catalog['file'])) {
+
+								$size = filesize(DIR_IMAGE . $product_catalog['file']);
+
+								$i = 0;
+
+								$suffix = array(
+									'B',
+									'KB',
+									'MB',
+									'GB',
+									'TB',
+									'PB',
+									'EB',
+									'ZB',
+									'YB'
+								);
+
+								while (($size / 1024) > 1) {
+									$size = $size / 1024;
+									$i++;
+								}
+
+								if ($this->request->server['HTTPS']) {
+									$href =  $this->config->get('config_ssl') . 'image/' . $product_catalog['file'];
+								} else {
+									$href = $this->config->get('config_url') . 'image/' . $product_catalog['file'];
+								}
+
+								$data['product_catalogs'][] = array(
+									'name' 			=> $product_catalog['name'],
+									'href' 			=> $href,
+									'size'			=> round(substr($size, 0, strpos($size, '.') + 4), 2) . ' ' . $suffix[$i],
+									'date_added' 	=> date($this->language->get('date_format_short'), strtotime($product_catalog['date_added']))
+								);
+							}
+						}
+					}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/product/product.tpl">
+		<operation>
+			<search>
+				<![CDATA[<li class="active"><a href="#tab-description" data-toggle="tab"><?php echo $tab_description; ?></a></li>]]>
+			</search>
+			<add position="after">
+				<![CDATA[
+					<?php if ($product_catalogs) { ?>
+						<li><a href="#tab-product-catalogs" data-toggle="tab"><?php echo $tab_catalog ?></a></li>
+					<?php } ?>
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search>
+				<![CDATA[<div class="tab-pane active" id="tab-description"><?php echo $description; ?></div>]]>
+			</search>
+			<add position="before">
+				<![CDATA[
+					<?php if ($product_catalogs) { ?>
+					<div class="tab-pane" id="tab-product-catalogs">
+					  <table class="table table-bordered table-hover">
+						<thead>
+						  <tr>
+							<td class="text-left"><?php echo $text_catalog_name; ?></td>
+							<td class="text-left"><?php echo $text_catalog_size; ?></td>
+							<td class="text-left"><?php echo $text_catalog_date_added; ?></td>
+							<td></td>
+						  </tr>
+						</thead>
+						<tbody>
+						  <?php foreach ($product_catalogs as $product_catalog) { ?>
+						  <tr>
+							<td class="text-left"><?php echo $product_catalog['name']; ?></td>
+							<td class="text-left"><?php echo $product_catalog['size']; ?></td>
+							<td class="text-left"><?php echo $product_catalog['date_added']; ?></td>
+							<td>
+								<a href="<?php echo $product_catalog['href']; ?>" download="catalog.pdf" data-toggle="tooltip" title="<?php echo $button_download; ?>" class="btn btn-primary"><i class="fa fa-cloud-download"></i></a> <a href="<?php echo $product_catalog['href']; ?>" target="_blank" data-toggle="tooltip" title="<?php echo $button_view; ?>" class="btn btn-primary"><i class="fa fa-eye"></i></a>
+							</td>
+						  </tr>
+						  <?php } ?>
+						</tbody>
+					  </table>
+					</div>
+					<?php } ?>
+				]]>
+			</add>
+		</operation>
+	</file>
+</modification>
